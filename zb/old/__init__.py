@@ -250,7 +250,7 @@ def fu0():
                             pass
         except:
             pass
-def fu1(mode):
+def set_object_mode(mode):
     if 'EDIT' in mode:
         mode = 'EDIT'
     if 'TEXTURE' in mode:
@@ -407,7 +407,7 @@ def load_zero_brush(context, filepath):
                 brush.use_paint_sculpt = True                
         brushes = 0 
         fu3(brush, tex, fn, filepath, brushes)
-    fu1(mode)
+    set_object_mode(mode)
     if aType == 'IMAGE_EDITOR':
         bpy.context.area.type = aType
         bpy.ops.object.mode_set(mode='EDIT')
@@ -584,7 +584,7 @@ class cl4(bpy.types.Operator):
                     mat.active_texture.image = img
                     imgNode = mat.node_tree.nodes['Image Texture zbColor']
                     imgNode.image = img
-        fu1(mode)                    
+        set_object_mode(mode)                    
         return {'FINISHED'}
 def load_brushes_folder(context, filepath):
     wm = bpy.context.window_manager
@@ -658,7 +658,7 @@ def load_brushes_folder(context, filepath):
                 else:
                     brush.use_paint_sculpt = True
             fu3(brush, tex, fn, filepath, brushes)
-    fu1(mode)
+    set_object_mode(mode)
     if aType == 'IMAGE_EDITOR':
         bpy.context.area.type = aType
         bpy.ops.object.mode_set(mode='EDIT')
@@ -921,7 +921,7 @@ class cl8(bpy.types.Operator):
                     bpy.ops.uv.smart_project(island_margin = 0.03)
             except:
                 pass
-        fu1(mode)        
+        set_object_mode(mode)        
         return{'FINISHED'}
 def zbPrecisePaintOption(self,context):
     wm = bpy.context.window_manager
@@ -1489,7 +1489,7 @@ class cl11(bpy.types.Operator):
             texOpas = 0
             alphaChoice = True
             normalChoice = True
-            mTex = texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+            mTex = add_tex_layer(layerType, texCol, texOpas, alphaChoice,
             normalChoice)
         else: 
             aType = bpy.context.area.type
@@ -1535,7 +1535,7 @@ class cl11(bpy.types.Operator):
             texOpas = 0
             alphaChoice = True
             normalChoice = True
-            mTex = texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+            mTex = add_tex_layer(layerType, texCol, texOpas, alphaChoice,
             normalChoice)
             mat = ob.active_material
             if ' Painted' in mat.name:
@@ -2261,7 +2261,7 @@ class cl18(bpy.types.Operator):
             if renEng == 'CYCLES':
                 ob.data.tag = True
             scene.zbGoCycles = False
-            fu18()
+            set_lamp_visible()
             brush = bpy.context.tool_settings.image_paint.brush
             img = brush.texture.image
             newName = ob.name[:4] + 'BrushColor'
@@ -2404,10 +2404,12 @@ class cl18(bpy.types.Operator):
             bpy.ops.object.mode_set(mode='TEXTURE_PAINT')
             fu0()
         return{'FINISHED'}
+
 class cl19(bpy.types.Operator):
-    bl_idname =i_0[62]
-    bl_label =i_0[63]
-    bl_description =i_0[64]
+    bl_idname = "object.zb_bump_to_normal"
+    bl_label = "ZB Merge Normals" 
+    bl_description = "Merge visible bump and normal layers into a single normal layer (may take several minutes)."
+
     def execute(self,context):
         scene = bpy.context.scene
         mode = bpy.context.mode
@@ -2421,8 +2423,7 @@ class cl19(bpy.types.Operator):
         if re == 'CYCLES':
             scene.zbGoCycles = False
         newName = ob.name[:4] + 'Normal'        
-        img = bpy.data.images.new(name= newName, width= scene.zbImgSize,
-        height = scene.zbImgSizeH)        
+        img = bpy.data.images.new(name=newName, width=scene.zbImgSize, height=scene.zbImgSizeH)        
         for obj in bpy.data.objects:
             if hasattr(obj,'active_material'):
                 if obj.active_material == ob.active_material:
@@ -2447,7 +2448,7 @@ class cl19(bpy.types.Operator):
         tex.use_normal_map = True
         mat.texture_slots[tex.name].use_map_color_diffuse = False
         mat.texture_slots[tex.name].normal_factor = 5
-        fu21(mat)
+        create_normal_map_node(mat)
         try: 
             for slot in mat.texture_slots:
                 try: 
@@ -2473,7 +2474,7 @@ class cl19(bpy.types.Operator):
             pass
         if re == 'CYCLES':
             scene.zbGoCycles = True
-        fu1(mode)
+        set_object_mode(mode)
         fu0()
         return{'FINISHED'}
 class zbBake(bpy.types.Operator):
@@ -2794,14 +2795,14 @@ class zbBake(bpy.types.Operator):
                     if bt == 'DERIVATIVE':
                         ts.normal_factor = .4
                     ts.use_map_color_diffuse = False          
-                    fu18() 
+                    set_lamp_visible() 
                     activeTex = mat.active_texture_index
                     mat.use_textures[activeTex] = False
                     bpy.ops.object.mode_set(mode='OBJECT')
                     bpy.ops.object.bake_image()                     
                     mat.use_textures[activeTex] = True
                     if 'NORMAL' in bt:
-                        fu21(mat)
+                        create_normal_map_node(mat)
                     ts.use_map_color_diffuse = False
                     ts.texture.use_normal_map = True
                     ts.normal_factor = 5    
@@ -2855,7 +2856,7 @@ class zbBake(bpy.types.Operator):
                 for ob in bpy.data.objects:
                     if 'zbCyclesLight' in ob.name:
                         ob.hide = True
-        fu1(mode)                                         
+        set_object_mode(mode)                                         
         if userMessage:
             self.report({'INFO'}, userMessage)                
         return{'FINISHED'}
@@ -2925,7 +2926,7 @@ def fu14():
                 print('')
     scene.objects.active = bpy.data.objects[origActive]
 def fu15(layerTypeChoice,ob,renEng,bt):
-    texLayerAdder(layerType=layerTypeChoice, texCol = 1, 
+    add_tex_layer(layerType=layerTypeChoice, texCol = 1, 
     texOpas = 0, alphaChoice = True, normalChoice = True)    
     mat = ob.active_material
     tex = mat.active_texture
@@ -3084,7 +3085,7 @@ def fu16(selected,bt,mSize):
                 activeSlot.use_map_color_diffuse = False
                 activeSlot.use_map_normal = True
                 activeSlot.normal_factor = 5  
-                fu21(mat)
+                create_normal_map_node(mat)
         else:
             bpMat = bakeProxy.active_material                
             i=0 
@@ -3149,7 +3150,7 @@ def fu17(useNormal):
     scene.objects.active = bpy.data.objects[origActive]
     bpy.context.active_object.select = True                         
     bpy.ops.object.join()
-def fu18():
+def set_lamp_visible():
     if len(bpy.data.lamps) < 1:
         newLamp = bpy.data.lamps.new(name='Basic Lamp',type ='HEMI')
         txt1 = 'No lamps were found in the scene, so one was created ' 
@@ -3283,7 +3284,7 @@ def fu20(bake_type):
             if scene.zbBakeSingle:
                 fu14()        
     return abort, mSize, userMessage
-def fu21(mat):
+def create_normal_map_node(mat):
     scene = bpy.context.scene
     ob = bpy.context.active_object
     tex = mat.active_texture
@@ -3717,7 +3718,7 @@ class cl25(bpy.types.Operator):
             bpy.ops.object.select_all(action='DESELECT')
             for ob in sel:
                 ob.select = True
-        fu1(mode)
+        set_object_mode(mode)
         scene.update_tag()
         scene.update()
         return{'FINISHED'}
@@ -3920,7 +3921,7 @@ def fu24(self,context):
         except:
             pass
     try: 
-        fu1(mode)
+        set_object_mode(mode)
     except:
         pass
     for ob in sel:
@@ -3954,7 +3955,7 @@ class cl26(bpy.types.Operator):
                 bpy.ops.object.zb_delete_texture(tex_kill=layer)
                 bpy.ops.object.zb_paint_color()
                 userMsg = "Reset uvs and layer (this will also reset your image if only one layer)"
-        fu1(mode)
+        set_object_mode(mode)
         if userMsg:
             self.report({'INFO'}, userMsg)
         return{'FINISHED'}
@@ -4066,9 +4067,9 @@ class cl27(bpy.types.Operator):
             if wm.zbLastObjectMode == 'PARTICLE':
                 wm.zbLastObjectMode = ''
                 bpy.ops.object.mode_set(mode='PARTICLE_EDIT')
-        fu1(mode)    
+        set_object_mode(mode)    
         return{'FINISHED'}
-def texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+def add_tex_layer(layerType, texCol, texOpas, alphaChoice,
     normalChoice):
     try: 
         sys = bpy.context.user_preferences.system
@@ -4556,7 +4557,7 @@ class cl28(bpy.types.Operator):
             pass
         alphaChoice = True
         normalChoice = True
-        texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+        add_tex_layer(layerType, texCol, texOpas, alphaChoice,
         normalChoice)
         return {'FINISHED'}
 class cl29(bpy.types.Operator):
@@ -4571,7 +4572,7 @@ class cl29(bpy.types.Operator):
         texOpas = 1.0
         alphaChoice = True
         normalChoice = True
-        mTex = texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+        mTex = add_tex_layer(layerType, texCol, texOpas, alphaChoice,
         normalChoice)
         mTex.use_map_color_diffuse = False
         mTex.normal_factor = 0.25
@@ -4600,7 +4601,7 @@ class cl30(bpy.types.Operator):
         texOpas = 0.0
         alphaChoice = True
         normalChoice = False
-        mTex = texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+        mTex = add_tex_layer(layerType, texCol, texOpas, alphaChoice,
         normalChoice)
         ob = bpy.context.active_object
         mat = ob.active_material
@@ -4627,7 +4628,7 @@ class cl31(bpy.types.Operator):
         texOpas = 0.0
         alphaChoice = True
         normalChoice = False
-        mTex = texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+        mTex = add_tex_layer(layerType, texCol, texOpas, alphaChoice,
         normalChoice)
         ob = bpy.context.active_object
         mat = ob.active_material
@@ -4648,7 +4649,7 @@ class cl32(bpy.types.Operator):
         texOpas = 0.0
         alphaChoice = True
         normalChoice = False
-        mTex = texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+        mTex = add_tex_layer(layerType, texCol, texOpas, alphaChoice,
         normalChoice)
         ob = bpy.context.active_object
         mat = ob.active_material
@@ -4672,7 +4673,7 @@ class cl33(bpy.types.Operator):
         texOpas = 0.0
         alphaChoice = True
         normalChoice = False
-        mTex = texLayerAdder(layerType, texCol, texOpas, alphaChoice,
+        mTex = add_tex_layer(layerType, texCol, texOpas, alphaChoice,
         normalChoice)
         mTex.use_map_emit = True
         mTex.emit_factor = 0.05
@@ -4687,10 +4688,14 @@ class cl33(bpy.types.Operator):
         ls.correction = 0.75
         ls.indirect_bounces = 3
         return {'FINISHED'}
+
 class cl34(bpy.types.Operator):
-    bl_idname =i_0[107]
-    bl_label =i_0[108]
-    bl_description =i_0[109]
+    #bl_idname =i_0[107]
+    #bl_label =i_0[108]
+    #bl_description =i_0[109]
+    bl_idname = "object.zb_paint_normal"
+    bl_label = "Add Normal", 
+    bl_description = "Convert the detail from your multires modifier into a normal map", 
     def execute(self, context):
         scene = bpy.context.scene
         bt = scene.render.bake_type
@@ -4705,9 +4710,9 @@ class cl34(bpy.types.Operator):
         if 'DERIVATIVE' in bt:
             layerType = "Derivative"
             normalChoice = True        
-        texLayerAdder(layerType, texCol, 
-        texOpas, alphaChoice, normalChoice)
+        add_tex_layer(layerType, texCol, texOpas, alphaChoice, normalChoice)
         return {'FINISHED'}
+
 class cl35(bpy.types.Operator):
     bl_idname =i_0[110]
     bl_label =i_0[111]
@@ -4943,9 +4948,13 @@ class cl39(bpy.types.Operator):
             self.report({'INFO'}, "Recommend retopology as next step in design")
         return {'FINISHED'}
 class cl40(bpy.types.Operator):
-    bl_idname =i_0[128]
-    bl_label =i_0[129]
-    bl_description =i_0[130]
+    #bl_idname =i_0[128]
+    #bl_label =i_0[129]
+    #bl_description =i_0[130]
+
+    bl_idname = "object.zb_bake_normal" 
+    bl_label = "Bake Multires Normal"
+    bl_description = "Apply multires sculpt detail as a normal map to your object (may take several minutes).", 
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context):
         wm = bpy.context.window_manager
@@ -4964,7 +4973,7 @@ class cl40(bpy.types.Operator):
         if scene.zbFastMode:
             fastModeState = True
             scene.zbFastMode = False
-        fu18()        
+        set_lamp_visible()        
         bpy.ops.object.mode_set(mode='OBJECT')        
         modsToAvoid = ['MULTIRES','SUBSURF']
         multires = 0
@@ -4973,8 +4982,7 @@ class cl40(bpy.types.Operator):
                 multires = mod
             if mod.type not in modsToAvoid:
                 try:
-                    bpy.ops.object.modifier_apply(modifier=mod.name,
-                    apply_as='DATA')
+                    bpy.ops.object.modifier_apply(modifier=mod.name, apply_as='DATA')
                 except:
                     pass
         if multires == 0:
@@ -5000,7 +5008,7 @@ class cl40(bpy.types.Operator):
             if bt == 'DERIVATIVE':
                 mat.texture_slots[tex.name].normal_factor = .4
             mat.texture_slots[tex.name].use_map_color_diffuse = False        
-            fu18()
+            set_lamp_visible()
             levels = multires.levels
             reduced = int(levels/2)
             if reduced < 1:
@@ -5013,12 +5021,12 @@ class cl40(bpy.types.Operator):
             scene.render.use_bake_selected_to_active = False
             bpy.ops.object.bake_image()
             if bt != 'DISPLACEMENT' and bt != 'DERIVATIVE':
-                fu21(mat)
+                create_normal_map_node(mat)
             try: 
                 multires.levels = levels
             except:
                 pass
-            fu1(mode)
+            set_object_mode(mode)
             if fastModeState:
                 scene.zbFastMode = True 
         return {'FINISHED'}
@@ -5375,7 +5383,7 @@ def fu26(self,context):
             if activeOb:
                 activeOb.select = True
                 bpy.context.scene.objects.active = activeOb
-            fu1(mode)
+            set_object_mode(mode)
         try: 
             if scene.zbQuickLights:
                 scene.world = bpy.data.worlds["ZB Quick Lights"]
@@ -5441,8 +5449,9 @@ def fu26(self,context):
     except:
         pass
     scene.update()
-    fu1(mode)
+    set_object_mode(mode)
     fu11()
+
 class cl42(bpy.types.Operator):
     bl_idname =i_0[134]
     bl_label =i_0[135]
