@@ -235,15 +235,6 @@ void List<T>::sortedInsert(Node* p){
     if (!p) {
         return;
     }
-
-    _len++;
-    if (_head == nullptr){
-        _head = p;
-        _tail = p;
-        _tail->next = nullptr;
-        return;
-    }
-
     Node* iter = _head;
     Node* prev = nullptr;
     while(iter) {
@@ -253,18 +244,17 @@ void List<T>::sortedInsert(Node* p){
         prev = iter;
         iter = iter->next;
     }
-
+    p->next = iter;
+    _len++;
     // insert before _head
     if (prev == nullptr){
-        p->next = iter;
         _head = p;
     }
-    else { //insert in middle
+    else {
         prev->next = p;
-        p->next = iter;
-        if (iter == nullptr){
-            _tail = p;
-        }
+    }
+    if (iter == nullptr){
+        _tail = p;
     }
 }
 
