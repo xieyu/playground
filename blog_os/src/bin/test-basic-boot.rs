@@ -10,17 +10,17 @@ use core::panic::PanicInfo;
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    println!("{}", info);
+    serial_println!("fail");
+    serial_println!("{}", info);
+    unsafe {exit_qemu();}
     loop{}
 }
 
-// 程序的入口_start
-// no_mangle, 函数名以C的格式导出
 #[cfg(not(test))]
 #[no_mangle]
 pub extern "C" fn _start() -> !{
-    println!("hello, world");
-    serial_println!("hello Host{}", "!");
+    serial_println!("ok");
+    panic!("fail");
     unsafe { exit_qemu();}
     //write!(vga_buffer::WRITER.lock(), "hello").unwrap();
     loop{}
