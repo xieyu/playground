@@ -139,3 +139,54 @@ pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     WRITER.lock().write_fmt(args).unwrap();
 }
+
+#[cfg(test)]
+mod test{
+    use super::*;
+
+    fn construct_writer() -> Writer {
+        use std::boxed::Box;
+        let buffer = construct_buffer();
+        Writer {
+            column_postion: 0,
+            color_code: ColorCode::new(Color::Blue, Color::Magenta),
+            buffer: Box::leak(Box::new(buffer))
+        }
+    }
+
+    fn construct_buffer () -> Buffer {
+        use array_init::array_init;
+
+        return Buffer {
+            chars: array_init(|_| array_init(|_| Volatile::new(empty_char())))
+        }
+    }
+
+    fn empty_char () -> ScreenChar {
+        ScreenChar {
+            ascii_character: b' ',
+            color_code: ColorCode::new(Color::Green, Color::Brown)
+        }
+    }
+
+    #[test]
+    fn write_byte() {
+        let mut writer = construct_writer();
+        writer.write_byte(b'X');
+        writer.write_byte(b'Y');
+        for (i, row) in writer.buffer.chars.iter().enumerate() {
+            for (j, screenchar) in row.iter().enumerate() {
+                let screenchar = screenchar.read();
+                if i == BUFFER_HEIGHT - 1 && j == 0 {
+                    assert_eq!(screenchar.ascii_character, b'X');
+                    assert_eq!(screenchar.color_code, writer.color_code);
+                } else if i == BUFFER_HEIGHT - 1 && j == 1 {
+                    assert_eq!(screenchar.ascii_character, b'Y');
+                    assert_eq!(screenchar.color_code, writer.color_code);
+                }else{
+                    assert_eq!(screenchar, empty_char());
+                }
+            }
+        }
+    }
+}
