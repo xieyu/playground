@@ -11,7 +11,7 @@ use core::panic::PanicInfo;
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop{}
+    blog_os::hlt_loop();
 }
 
 // 程序的入口_start
@@ -19,19 +19,17 @@ fn panic(info: &PanicInfo) -> ! {
 #[cfg(not(test))]
 #[no_mangle]
 pub extern "C" fn _start() -> !{
+    use blog_os::interrupts::PICS;
     println!("hello, world");
     serial_println!("hello Host{}", "!");
     blog_os::gdt::init();
     blog_os::interrupts::init_idt();
-    x86_64::instructions::int3();
-    fn statck_overflow() {
-        statck_overflow();
-    }
-    statck_overflow();
+    unsafe {PICS.lock().initialize();}
 
+    x86_64::instructions::interrupts::enable();
     println!("It's not crash");
     unsafe { exit_qemu();}
     //write!(vga_buffer::WRITER.lock(), "hello").unwrap();
-    loop{}
+    blog_os::hlt_loop();
 }
 
