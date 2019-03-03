@@ -21,8 +21,14 @@ fn panic(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> !{
     println!("hello, world");
     serial_println!("hello Host{}", "!");
+    blog_os::gdt::init();
     blog_os::interrupts::init_idt();
     x86_64::instructions::int3();
+    fn statck_overflow() {
+        statck_overflow();
+    }
+    statck_overflow();
+
     println!("It's not crash");
     unsafe { exit_qemu();}
     //write!(vga_buffer::WRITER.lock(), "hello").unwrap();
