@@ -25,11 +25,31 @@ pub extern "C" fn _start() -> !{
     blog_os::gdt::init();
     blog_os::interrupts::init_idt();
     unsafe {PICS.lock().initialize();}
-
     x86_64::instructions::interrupts::enable();
+
+    use x86_64::registers::control::Cr3;
+    let (level_4_page_table, _) = Cr3::read();
+    println!("Level 4 page table at :{:?}", level_4_page_table.start_address());
+
+
+    let level_4_page_table_pointer = 0xffff_ffff_ffff_f000 as *const u64;
+    for i in 0..10 {
+        let entry = unsafe{*level_4_page_table_pointer.offset(i)};
+        println!("Entry {}: {:#x}", i, entry);
+    }
+
+    use x86_64::structures::paging::PageTable;
+    let level_4_page_table_ptr = 0xffff_ffff_ffff_f000 as *const PageTable;
+    let level_4_table = unsafe {&*level_4_page_table_ptr};
+    for i in 0..10 {
+        println!("Entry {}: {:?}", i, level_4_table[i]);
+    }
+
     println!("It's not crash");
-    unsafe { exit_qemu();}
-    //write!(vga_buffer::WRITER.lock(), "hello").unwrap();
+    let ptr = 0xdeadbeef as *mut u32;
+    unsafe{let x = *ptr;}
+    unsafe{*ptr=42;}
+    println!("It did not crash");
     blog_os::hlt_loop();
 }
 
