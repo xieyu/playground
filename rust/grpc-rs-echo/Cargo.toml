@@ -1,0 +1,7 @@
+[package]
+name = "grpc-rs-echo"
+version = "0.1.0"
+authors = ["xieyu <xieyu3@gmail.com>"]
+edition = "2018"
+
+[dependencies]
