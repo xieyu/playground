@@ -1,4 +1,4 @@
-syntax = "proto3"
+syntax = "proto3";
 package echo;
 
 service EchoService {
@@ -7,8 +7,8 @@ service EchoService {
 
 message EchoReq {
   string msg = 1;
-}
+};
 
 message EchoResp {
   string msg = 1;
-}
+};

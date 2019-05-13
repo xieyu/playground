@@ -1,8 +1,9 @@
 [package]
-name = "echo-pb"
+name = "pb"
 version = "0.1.0"
 authors = ["xieyu <xieyu3@gmail.com>"]
 edition = "2018"
+build = "build.rs"
 
 [dependencies]
 futures = "0.1"
@@ -20,3 +21,4 @@ prost-types = "0.5"
 protobuf = "~2.2"
 protobuf-codegen = "~2.2"
 protoc-rust = "2.0"
+protoc-grpcio = "1.0.2"

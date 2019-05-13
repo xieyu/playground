@@ -1,12 +1,9 @@
-extern crate protoc_rust;
+extern crate protoc_grpcio;
 
-use std::env;
-use std::fs::{self, File};
-use std::io::Write;
-
-use std::path::{Path, PathBuf};
-
-use grpcio_compiler::codegen as grpc_gen;
-use prost::Message;
-
-use protoc_rust::Customize;
+fn main() {
+    let proto_dir = "proto";
+    let out_dir = "src/";
+    println!("cargo:return-if-changed={}", proto_dir);
+    protoc_grpcio::compile_grpc_protos(&["echo/echo.proto"], &[proto_dir], &out_dir, None)
+        .expect("fail to compile grpc definations");
+}

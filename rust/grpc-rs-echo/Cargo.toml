@@ -5,3 +5,14 @@ authors = ["xieyu <xieyu3@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+pb = { path="echo-pb"}
+grpcio = {version="0.5.0-alpha.1", default-features = false, features = ["protobuf-codec"]}
+futures = "^0.1.15"
+
+[[example]]
+name = "echo-client"
+path = "examples/echo/client.rs"
+
+[[example]]
+name = "echo-server"
+path = "examples/echo/server.rs"
