@@ -21,7 +21,7 @@ impl EchoService for ImplEchoService {
     }
 }
 
-fn register_service(mut& builder: ServerBuilder) {
+pub fn register_service(mut& builder: ServerBuilder) {
     let echo_service = echo_grpc::create_echo_service(ImplEchoService {});
     builder.register_service(echo_service)
 }

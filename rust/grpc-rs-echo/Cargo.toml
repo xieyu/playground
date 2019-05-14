@@ -5,7 +5,6 @@ authors = ["xieyu <xieyu3@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-pb = { path="echo-pb"}
 grpcio = {version="0.5.0-alpha.1", default-features = false, features = ["protobuf-codec"]}
 futures = "^0.1.15"
 
@@ -16,3 +15,13 @@ path = "examples/echo/client.rs"
 [[example]]
 name = "echo-server"
 path = "examples/echo/server.rs"
+
+[build-dependencies]
+grpcio-compiler = "0.5.0-alpha"
+protobuf-build = "0.2"
+prost = "0.5"
+prost-types = "0.5"
+protobuf = "~2.2"
+protobuf-codegen = "~2.2"
+protoc-rust = "2.0"
+protoc-grpcio = "1.0.2"
